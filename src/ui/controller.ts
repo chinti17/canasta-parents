@@ -61,7 +61,11 @@ function attempt(
   const result = apply(round, action, config)
   if (!result.ok) return note(ui, result.reason)
 
-  if (result.round.over && ui.confirmingGoOut === null) {
+  // Only a genuine go-out (someone emptied their hand) needs confirmation. A
+  // round that ends another way — e.g. drawing from an exhausted stock — is not
+  // a go-out and should just proceed.
+  const isGoOut = result.round.over && result.round.wentOutSeat !== undefined
+  if (isGoOut && ui.confirmingGoOut === null) {
     return stay({
       ...ui,
       confirmingGoOut: action,

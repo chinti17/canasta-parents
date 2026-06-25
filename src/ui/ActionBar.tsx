@@ -4,6 +4,7 @@
 // interaction controller via `onIntent`. Feedback and go-out confirmation
 // (illegal-move messages, "this ends the round") live here too.
 
+import { useMemo } from 'react'
 import { availableActions } from '../game/moves'
 import type { GameConfig, RoundState } from '../engine/types'
 import { meldHint, type UiIntent, type UiState } from './controller'
@@ -24,7 +25,9 @@ export default function ActionBar({
   ui,
   onIntent,
 }: ActionBarProps) {
-  const moves = availableActions(round)
+  // Enumerating legal moves walks the rules engine; recompute only when the
+  // round actually changes, not on every unrelated re-render.
+  const moves = useMemo(() => availableActions(round), [round])
   const { selected } = ui
 
   // Go-out confirmation takes over the bar until resolved.
@@ -54,8 +57,13 @@ export default function ActionBar({
     )
   }
 
+  // Only hint about melding when the player is plausibly building one (2+ cards
+  // selected). A single selected card reads as a discard, so a "needs 3 cards"
+  // meld error there is misleading.
   const hint =
-    moves.phase === 'action' ? meldHint(round, config, selected) : null
+    moves.phase === 'action' && selected.length >= 2
+      ? meldHint(round, config, selected)
+      : null
 
   return (
     <div className="space-y-2">
@@ -72,14 +80,26 @@ export default function ActionBar({
 
       {moves.phase === 'draw' ? (
         <div className="flex flex-wrap justify-center gap-2">
-          <button
-            type="button"
-            disabled={!moves.canDrawStock}
-            className={`${BTN} bg-indigo-500 text-white hover:bg-indigo-400`}
-            onClick={() => onIntent({ type: 'DRAW_STOCK' })}
-          >
-            Draw stock
-          </button>
+          {moves.canDrawStock || moves.takePile.length > 0 ? (
+            <button
+              type="button"
+              disabled={!moves.canDrawStock}
+              className={`${BTN} bg-indigo-500 text-white hover:bg-indigo-400`}
+              onClick={() => onIntent({ type: 'DRAW_STOCK' })}
+            >
+              Draw stock
+            </button>
+          ) : (
+            // Stock is empty and nothing can be taken — without this the human
+            // would have no control to act with and the round would stall.
+            <button
+              type="button"
+              className={`${BTN} bg-amber-500 text-amber-950 hover:bg-amber-400`}
+              onClick={() => onIntent({ type: 'DRAW_STOCK' })}
+            >
+              No cards to draw — end round
+            </button>
+          )}
           {moves.takePile.map((option, i) => (
             <button
               key={i}
@@ -128,8 +148,10 @@ export default function ActionBar({
               </button>
             )}
           </div>
-          {selected.length > 0 && hint && (
-            <p className="text-center text-[0.65rem] text-white/50">{hint}</p>
+          {hint && (
+            <p className="text-center text-[0.65rem] text-white/50">
+              To meld: {hint}
+            </p>
           )}
         </div>
       )}
