@@ -194,4 +194,57 @@ describe('finishRound', () => {
     expect(result.gameOver).toBe(true)
     expect(result.winningTeam).toBe(0)
   })
+
+  it('picks the higher score when two teams cross the target together', () => {
+    const round = roundWith({
+      team0Melds: [meld('K', seq('K', 7))], // +570 with go-out below
+      team0Melded: true,
+      wentOutSeat: 0,
+    })
+    round.teams[0]!.score = 4900 // + (70+500+100) = 5570
+    round.teams[1]!.score = 6000 // already past and higher
+    const result = finishRound(round, DEFAULT_CONFIG)
+    expect(result.gameOver).toBe(true)
+    expect(result.winningTeam).toBe(1)
+  })
+})
+
+describe('scoring scenarios', () => {
+  it('scores a concealed go-out with a mixed canasta and red 3s', () => {
+    const mixedCanasta = meld('Q', [...seq('Q', 6), card('JOKER')]) // 6*10+50=110, +300
+    const round = roundWith({
+      team0Melds: [mixedCanasta],
+      team0Melded: true,
+      wentOutSeat: 0,
+      concealed: true,
+    })
+    round.teams[0]!.redThrees = [card('3', 'hearts'), card('3', 'diamonds')]
+    const [s0] = scoreRound(round)
+    // 110 meld + 300 canasta + 200 red3 + 200 concealed go-out − 0 hand
+    expect(s0).toMatchObject({
+      meldPoints: 110,
+      canastaBonus: 300,
+      redThreeBonus: 200,
+      goOutBonus: 200,
+      handPenalty: 0,
+      total: 810,
+    })
+  })
+
+  it('subtracts red 3s and the hand penalty for a team that never melded', () => {
+    const round = roundWith({
+      team0Melded: false,
+      team0Hand: [card('K', 'clubs'), card('2', 'hearts')], // 10 + 20 penalty
+    })
+    round.teams[0]!.redThrees = [card('3', 'hearts')] // −100 (never melded)
+    const [s0] = scoreRound(round)
+    expect(s0).toMatchObject({
+      meldPoints: 0,
+      canastaBonus: 0,
+      redThreeBonus: -100,
+      goOutBonus: 0,
+      handPenalty: 30,
+      total: -130,
+    })
+  })
 })

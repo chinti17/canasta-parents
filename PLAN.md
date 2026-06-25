@@ -121,10 +121,10 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(engine): meld/canasta/red-3 scoring`
-- [ ] `feat(engine): hand-count penalties + go-out bonuses`
-- [ ] `feat(engine): cumulative game scoring + win detection (to 5000)`
-- [ ] `test(engine): scoring scenarios incl. concealed go-out`
+- [x] `feat(engine): meld/canasta/red-3 scoring`
+- [x] `feat(engine): hand-count penalties + go-out bonuses`
+- [x] `feat(engine): cumulative game scoring + win detection (to 5000)`
+- [x] `test(engine): scoring scenarios incl. concealed go-out`
 
 **Outcome:** Engine produces a verifiable scoreboard at round end and declares a game winner. Fully tested.
 
