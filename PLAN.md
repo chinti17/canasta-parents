@@ -229,31 +229,31 @@ first turn is self-explanatory — plus the fixes from a code review of Phases 5
 
 **Commit-plan:**
 
-- [ ] `feat(ui): start screen (title + New Game / Resume) instead of auto-starting`
-- [ ] `feat(ui): resume only on explicit choice; show a saved-game summary, never auto-drop mid-game`
-- [ ] `feat(ui): "How to play" panel (reachable from start screen and a '?' on the table)`
-- [ ] `feat(ui): first-turn nudge so the table is self-explanatory without the README`
-- [ ] `test(ui): start-screen / resume flow`
+- [x] `feat(ui): start screen (title + New Game / Resume) instead of auto-starting`
+- [x] `feat(ui): resume only on explicit choice; show a saved-game summary, never auto-drop mid-game`
+- [x] `feat(ui): "How to play" panel (reachable from start screen and a '?' on the table)`
+- [x] `feat(ui): first-turn nudge so the table is self-explanatory without the README`
+- [x] `test(ui): start-screen / resume flow`
 
 **Code-review findings to fix (review of Phases 5–7, 2026-06-25):**
 
-- [ ] `fix(ui): human draw-phase deadlock on stock-out` — when the stock is empty and no
+- [x] `fix(ui): human draw-phase deadlock on stock-out` — when the stock is empty and no
       take-pile option exists, `Draw stock` is disabled (`canDrawStock = drawing &&
       stock.length>0`) and the human has no control to act with. The engine ends the round
       on `DRAW_STOCK` from an empty stock, but the UI can't trigger it. Offer an explicit
       "end turn / stock out" path (or let the disabled draw pass through to end the round).
       **[High — correctness]**
-- [ ] `fix(ui): don't silently resume a saved game` — `GameView.init()` does
+- [x] `fix(ui): don't silently resume a saved game` — `GameView.init()` does
       `loadSession() ?? createSession(...)`, dropping the player mid-game with no choice and
       no validation the save fits the current build/`humanSeat`. This is the reported
       "it just starts / I'm confused." The start-screen Resume flow above resolves it;
       also validate the save (bump `SCHEMA_VERSION` / check `humanSeat`) before resuming.
       **[High — UX/correctness]**
-- [ ] `fix(ui): meld hint shown for non-meld selections` — in the action phase the hint
+- [x] `fix(ui): meld hint shown for non-meld selections` — in the action phase the hint
       always reports a *meld* rejection, so selecting one card to discard shows
       "a meld needs at least 3 cards", which looks like an error when discarding is legal.
       Only hint when a meld is actually being attempted, or word it neutrally. **[Med — UX]**
-- [ ] `perf(ui): memoize availableActions in ActionBar` — `availableActions(round)` runs
+- [x] `perf(ui): memoize availableActions in ActionBar` — `availableActions(round)` runs
       bot-style move enumeration (incl. `takePileOptions`) on every render, even off-turn.
       Memoize on round/phase. **[Low — efficiency]**
 
