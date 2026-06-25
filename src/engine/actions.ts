@@ -38,6 +38,43 @@ const err = (reason: string): ApplyResult => ({ ok: false, reason })
 
 // --- small helpers ----------------------------------------------------------
 
+/**
+ * Deep-clone the mutable structure of a round while *sharing* card objects.
+ * Cards are immutable here (only ever moved between arrays, never edited), so
+ * reusing their references is safe — and far cheaper than `structuredClone`,
+ * which matters under the bots' heavy lookahead. Every array/object the reducer
+ * mutates is freshly copied, so the input round is never touched.
+ */
+function cloneRound(round: RoundState): RoundState {
+  return {
+    players: round.players.map((p) => ({
+      seat: p.seat,
+      teamId: p.teamId,
+      hand: p.hand.slice(),
+    })),
+    teams: round.teams.map((t) => ({
+      id: t.id,
+      seats: t.seats.slice(),
+      melds: t.melds.map((m) => ({ rank: m.rank, cards: m.cards.slice() })),
+      redThrees: t.redThrees.slice(),
+      hasMelded: t.hasMelded,
+      score: t.score,
+    })),
+    stock: round.stock.slice(),
+    discard: {
+      cards: round.discard.cards.slice(),
+      frozen: round.discard.frozen,
+    },
+    currentSeat: round.currentSeat,
+    phase: round.phase,
+    tookDiscard: round.tookDiscard,
+    turnStartHasMelded: round.turnStartHasMelded.slice(),
+    over: round.over,
+    wentOutSeat: round.wentOutSeat,
+    wentOutConcealed: round.wentOutConcealed,
+  }
+}
+
 function topOf(round: RoundState): Card | undefined {
   return round.discard.cards[round.discard.cards.length - 1]
 }
@@ -82,7 +119,7 @@ export function apply(
   config: GameConfig = DEFAULT_CONFIG,
 ): ApplyResult {
   if (round.over) return err('the round is over')
-  const next = structuredClone(round)
+  const next = cloneRound(round)
   const player = next.players[next.currentSeat]!
   const team = next.teams[player.teamId]!
 
@@ -113,6 +150,7 @@ function drawStock(
   }
 
   // Draw one; if it is a red 3, set it aside and draw again.
+  let drewCard = false
   for (;;) {
     const card = round.stock.pop()!
     if (isRed3(card)) {
@@ -121,7 +159,16 @@ function drawStock(
       continue
     }
     player.hand.push(card)
+    drewCard = true
     break
+  }
+
+  // The stock can run out while drawing only red 3s, leaving the player no
+  // playable card to draw — the stock is exhausted, so the round ends here
+  // (just as it does when a player draws from an already-empty stock).
+  if (!drewCard) {
+    round.over = true
+    return ok(round)
   }
 
   round.phase = 'action'
