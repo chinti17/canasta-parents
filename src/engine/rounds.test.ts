@@ -44,9 +44,10 @@ describe('createRound', () => {
   it('has one card in the discard pile and a non-empty stock', () => {
     const round = createRound(1)
     expect(round.discard.cards).toHaveLength(1)
-    expect(round.stock.length).toBe(
-      DEFAULT_CONFIG.numDecks * 54 - 6 * 11 - 1,
-    )
+    // Base stock minus replacements drawn for red 3s laid down at setup.
+    const redThrees = round.teams.reduce((n, t) => n + t.redThrees.length, 0)
+    const base = DEFAULT_CONFIG.numDecks * 54 - 6 * 11 - 1
+    expect(round.stock.length).toBe(base - redThrees)
   })
 
   it('is deterministic for a given seed', () => {

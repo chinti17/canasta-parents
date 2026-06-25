@@ -2,6 +2,7 @@
 // Red-3 extraction from opening hands is layered on in red3.ts (a later commit).
 
 import { buildShoe, deal, isRed3, isWild, makeRng, shuffle } from './cards'
+import { setupRedThrees } from './red3'
 import {
   DEFAULT_CONFIG,
   teamOfSeat,
@@ -60,7 +61,7 @@ export function createRound(
   const top = discard[discard.length - 1]!
   const frozen = isWild(top) || isRed3(top)
 
-  return {
+  const round: RoundState = {
     players,
     teams,
     stock,
@@ -70,6 +71,10 @@ export function createRound(
     tookDiscard: false,
     over: false,
   }
+
+  // Lay down any red 3s dealt into opening hands and draw replacements.
+  setupRedThrees(round)
+  return round
 }
 
 /** Create a new game (round 0) from a seed. */
