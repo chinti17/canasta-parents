@@ -91,7 +91,7 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 - [x] `chore: add Tailwind CSS + base mobile-first layout shell`
 - [x] `chore: add ESLint + Prettier + tsconfig strict`
 - [x] `chore: add Vitest + first smoke test`
-- [ ] `docs: add README with run/build/test instructions` _(deferred — README intentionally empty for now)_
+- [x] `docs: add README with run/build/test instructions`
 
 **Outcome:** `npm run dev` serves an empty styled shell; `npm test` runs; lint/format enforced. Nothing playable yet.
 
