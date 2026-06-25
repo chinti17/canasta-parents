@@ -173,11 +173,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(ui): CSS/SVG card component + deck/back rendering`
-- [ ] `feat(ui): mobile-first 6-seat table layout (3 teams)`
-- [ ] `feat(ui): player hand fan + melds-by-team panels`
-- [ ] `feat(ui): discard pile, stock, scores, turn indicator`
-- [ ] `feat(ui): bind read-only render to live game state`
+- [x] `feat(ui): CSS/SVG card component + deck/back rendering`
+- [x] `feat(ui): mobile-first 6-seat table layout (3 teams)`
+- [x] `feat(ui): player hand fan + melds-by-team panels`
+- [x] `feat(ui): discard pile, stock, scores, turn indicator`
+- [x] `feat(ui): bind read-only render to live game state`
 
 **Outcome:** A running game (driven by the headless loop) is fully visible and legible on a phone. No clicks wired yet.
 

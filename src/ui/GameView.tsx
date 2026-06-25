@@ -17,6 +17,7 @@ import Hand from './Hand'
 import TeamMelds from './TeamMelds'
 import CenterTable from './CenterTable'
 import Scoreboard from './Scoreboard'
+import { teamColors } from './theme'
 
 const SPECTATOR_SEAT = -1
 const STEP_MS = 700
@@ -39,6 +40,9 @@ export default function GameView() {
   const { round } = session
   const seats = round.players.map((p) => p.seat)
   const opponents = seats.filter((s) => s !== PERSPECTIVE)
+  const winnerColors = session.winningTeam !== undefined
+    ? teamColors(session.winningTeam)
+    : null
 
   const seatChip = (seat: number) => {
     const p = round.players[seat]!
@@ -59,11 +63,21 @@ export default function GameView() {
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-3 bg-green-900 p-3 text-white">
       <header className="flex items-center justify-between text-xs text-green-200">
         <span className="font-semibold">Canasta</span>
-        <span>
-          Round {session.roundNumber + 1} ·{' '}
-          {session.over ? 'game over' : `seat P${round.currentSeat + 1} to ${round.phase}`}
-        </span>
+        <span className="rounded bg-black/20 px-1.5 py-0.5">spectator preview</span>
       </header>
+
+      {session.over && winnerColors ? (
+        <div
+          className={`rounded-md border px-3 py-2 text-center text-sm font-bold text-white ${winnerColors.border} ${winnerColors.panel}`}
+        >
+          🏆 {winnerColors.label} wins the game!
+        </div>
+      ) : (
+        <div className="rounded-md bg-black/20 px-3 py-1.5 text-center text-xs text-green-100">
+          Round {session.roundNumber + 1} · P{round.currentSeat + 1} to{' '}
+          <span className="font-semibold">{round.phase}</span>
+        </div>
+      )}
 
       <Scoreboard teams={round.teams} scores={session.scores} />
 
