@@ -24,7 +24,7 @@ export default function Seat({
   const c = teamColors(teamId)
   return (
     <div
-      className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 ${c.border} ${c.panel} ${
+      className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 transition-all ${c.border} ${c.panel} ${
         isActive ? 'ring-2 ring-white/80' : ''
       }`}
     >
