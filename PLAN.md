@@ -156,12 +156,12 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(game): turn loop + turn order for 6 seats / 3 teams`
-- [ ] `feat(game): human-action interface (engine actions surfaced for a UI)`
-- [ ] `feat(game): localStorage save/load of full game state`
-- [ ] `feat(game): headless simulation runner (1 human stub + 5 bots)`
-- [ ] `test(game): full game plays start→win without errors`
-- [ ] `test(game): seeded soak run — 10k+ games to surface rule edge-cases (deck depletion, illegal take-pile, stalemates)`
+- [x] `feat(game): turn loop + turn order for 6 seats / 3 teams`
+- [x] `feat(game): human-action interface (engine actions surfaced for a UI)`
+- [x] `feat(game): localStorage save/load of full game state`
+- [x] `feat(game): headless simulation runner (1 human stub + 5 bots)`
+- [x] `test(game): full game plays start→win without errors`
+- [x] `test(game): seeded soak run — 10k+ games to surface rule edge-cases (deck depletion, illegal take-pile, stalemates)`
 
 **Outcome:** `simulate()` runs complete games to a winner. A many-game seeded soak run passes with zero crashes/invalid states. State survives a reload via `localStorage`. UI can now be layered on a stable core.
 
