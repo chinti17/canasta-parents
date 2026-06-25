@@ -13,6 +13,8 @@ import {
 } from '../game/session'
 import { DEFAULT_CONFIG } from '../engine/types'
 import Seat from './Seat'
+import Hand from './Hand'
+import TeamMelds from './TeamMelds'
 
 const SPECTATOR_SEAT = -1
 const STEP_MS = 700
@@ -66,13 +68,23 @@ export default function GameView() {
         {opponents.map(seatChip)}
       </section>
 
-      {/* Center table — discard/stock/scores arrive in later commits */}
-      <section className="flex flex-1 items-center justify-center rounded-lg border border-white/10 bg-green-800/50 p-4 text-center text-xs text-white/50">
+      {/* Center table — discard/stock/scores arrive in the next commit */}
+      <section className="flex items-center justify-center rounded-lg border border-white/10 bg-green-800/50 p-3 text-center text-xs text-white/50">
         table centre (discard · stock · scores) — coming next
       </section>
 
-      {/* Perspective seat */}
-      <section className="space-y-2">{seatChip(PERSPECTIVE)}</section>
+      {/* Melds, grouped by team */}
+      <section className="grid gap-2">
+        {round.teams.map((t) => (
+          <TeamMelds key={t.id} team={t} />
+        ))}
+      </section>
+
+      {/* Perspective seat + hand */}
+      <section className="mt-auto space-y-2">
+        {seatChip(PERSPECTIVE)}
+        <Hand hand={round.players[PERSPECTIVE]!.hand} />
+      </section>
     </main>
   )
 }
