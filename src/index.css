@@ -1,5 +1,9 @@
-:root {
-  font-family: system-ui, -apple-system, sans-serif;
+@import 'tailwindcss';
+
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
