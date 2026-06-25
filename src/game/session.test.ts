@@ -75,3 +75,49 @@ describe('session reducer', () => {
     expect(next).toBe(s)
   })
 })
+
+describe('round flow', () => {
+  /** A session paused between rounds (round over, game not over). */
+  const betweenRounds = () => {
+    const s = createSession(1)
+    return {
+      ...s,
+      round: { ...s.round, over: true },
+      scores: [120, 30, 0],
+    }
+  }
+
+  it('deals the next round on NEXT_ROUND, carrying scores forward', () => {
+    const next = dispatch(betweenRounds(), { type: 'NEXT_ROUND' })
+    expect(next.roundNumber).toBe(1)
+    expect(next.round.over).toBe(false)
+    expect(next.round.phase).toBe('draw')
+    // Cumulative scores carry into the new round's teams (drives meld minimums).
+    expect(next.round.teams.map((t) => t.score)).toEqual([120, 30, 0])
+    expect(next.lastRoundResult).toBeUndefined()
+  })
+
+  it('ignores NEXT_ROUND while a round is still in progress', () => {
+    const s = createSession(1)
+    expect(dispatch(s, { type: 'NEXT_ROUND' })).toBe(s)
+  })
+
+  it('ignores play events during the between-rounds pause', () => {
+    const paused = betweenRounds()
+    expect(dispatch(paused, { type: 'BOT_STEP' })).toBe(paused)
+  })
+
+  it('starts a fresh game on NEW_GAME, preserving config and human seat', () => {
+    // human is seat 2, so seat 0 is a bot — advance the game a little first.
+    const played = dispatch(createSession(1, undefined, 2), {
+      type: 'BOT_STEP',
+    })
+    const fresh = dispatch(played, { type: 'NEW_GAME', seed: 99 })
+    expect(fresh.seed).toBe(99)
+    expect(fresh.roundNumber).toBe(0)
+    expect(fresh.over).toBe(false)
+    expect(fresh.scores).toEqual([0, 0, 0])
+    expect(fresh.humanSeat).toBe(2)
+    expect(fresh.round.phase).toBe('draw')
+  })
+})

@@ -46,10 +46,15 @@ export interface GameSession {
   winningTeam?: number
 }
 
-/** A human engine action, or a request to let the current bot take its turn. */
+/**
+ * Drive the session: a human engine action, a request to let the current bot
+ * take its turn, advancing past a finished round, or starting a new game.
+ */
 export type GameEvent =
   | { type: 'PLAYER_ACTION'; action: Action }
   | { type: 'BOT_STEP' }
+  | { type: 'NEXT_ROUND' }
+  | { type: 'NEW_GAME'; seed: number }
 
 /** Start a fresh game. Round 0 is dealt from `seed`; all scores begin at zero. */
 export function createSession(
@@ -88,35 +93,21 @@ export function isBotTurn(session: GameSession): boolean {
 }
 
 /**
- * Fold a completed round into the game: score it, carry the cumulative totals
- * forward, and either declare a winner or deal the next round. A round that
- * isn't over yet passes through untouched.
+ * Score a completed round and fold the totals into the cumulative scores. If a
+ * team has reached the target the game is over; otherwise the round stays
+ * `over` (a between-rounds pause) so the UI can show the scoreboard before the
+ * next deal — `NEXT_ROUND` advances. A round that isn't over passes through.
  */
 function settleRound(session: GameSession): GameSession {
   if (!session.round.over) return session
 
   const result = finishRound(session.round, session.config)
-  if (result.gameOver) {
-    return {
-      ...session,
-      scores: result.cumulative,
-      lastRoundResult: result,
-      over: true,
-      winningTeam: result.winningTeam,
-    }
-  }
-
-  const roundNumber = session.roundNumber + 1
   return {
     ...session,
-    roundNumber,
-    round: createRound(
-      session.seed + roundNumber,
-      session.config,
-      result.cumulative,
-    ),
     scores: result.cumulative,
     lastRoundResult: result,
+    over: result.gameOver,
+    winningTeam: result.gameOver ? result.winningTeam : undefined,
   }
 }
 
@@ -124,19 +115,39 @@ function settleRound(session: GameSession): GameSession {
  * The reducer. `PLAYER_ACTION` applies one engine action for the human (ignored
  * if it isn't their turn or the engine rejects it — the UI checks legality up
  * front via the human-action interface). `BOT_STEP` plays the current bot's
- * whole turn. Either way, a finished round is settled automatically.
+ * whole turn; both settle a finished round into a between-rounds pause.
+ * `NEXT_ROUND` deals the next round from that pause, and `NEW_GAME` restarts.
  */
 export function dispatch(session: GameSession, event: GameEvent): GameSession {
-  if (session.over || session.round.over) return session
-
   switch (event.type) {
+    case 'NEW_GAME':
+      return createSession(event.seed, session.config, session.humanSeat)
+
+    case 'NEXT_ROUND': {
+      if (session.over || !session.round.over) return session
+      const roundNumber = session.roundNumber + 1
+      return {
+        ...session,
+        roundNumber,
+        round: createRound(
+          session.seed + roundNumber,
+          session.config,
+          session.scores,
+        ),
+        lastRoundResult: undefined,
+      }
+    }
+
     case 'PLAYER_ACTION': {
+      if (session.over || session.round.over) return session
       if (session.round.currentSeat !== session.humanSeat) return session
       const result = apply(session.round, event.action, session.config)
       if (!result.ok) return session
       return settleRound({ ...session, round: result.round })
     }
+
     case 'BOT_STEP': {
+      if (session.over || session.round.over) return session
       if (session.round.currentSeat === session.humanSeat) return session
       const round = playTurn(session.round, session.config)
       return settleRound({ ...session, round })

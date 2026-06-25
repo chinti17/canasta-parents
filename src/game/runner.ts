@@ -87,6 +87,13 @@ export function runHeadlessGame(
   check(session)
 
   while (!session.over) {
+    // A finished round pauses for its scoreboard; advance to the next deal.
+    if (session.round.over) {
+      session = dispatch(session, { type: 'NEXT_ROUND' })
+      check(session)
+      continue
+    }
+
     // Reset the per-round turn counter whenever a new round is dealt.
     if (session.roundNumber !== roundNumber) {
       roundNumber = session.roundNumber
