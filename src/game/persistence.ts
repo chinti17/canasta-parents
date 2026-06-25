@@ -23,9 +23,13 @@ interface Envelope {
   session: GameSession
 }
 
-/** Resolve the ambient localStorage, or undefined when there's no DOM. */
+/** Resolve the ambient localStorage, or undefined when there's no DOM.
+ *  Gated on `window` so we never touch Node's experimental `localStorage`
+ *  global (which warns), keeping the headless tests/runner quiet. */
 function ambientStorage(): StorageLike | undefined {
-  return typeof localStorage !== 'undefined' ? localStorage : undefined
+  return typeof window !== 'undefined' && window.localStorage
+    ? window.localStorage
+    : undefined
 }
 
 /** Serialize a session to a versioned JSON string. */
