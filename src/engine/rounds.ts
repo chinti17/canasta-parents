@@ -69,6 +69,7 @@ export function createRound(
     currentSeat: 0,
     phase: 'draw',
     tookDiscard: false,
+    turnStartHasMelded: teams.map(() => false),
     over: false,
   }
 

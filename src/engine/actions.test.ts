@@ -43,6 +43,7 @@ function makeRound(o: RoundOverrides = {}): RoundState {
     currentSeat: 0,
     phase: o.phase ?? 'draw',
     tookDiscard: false,
+    turnStartHasMelded: [team.hasMelded],
     over: false,
   }
 }
@@ -77,24 +78,27 @@ describe('DRAW_STOCK', () => {
     expect(apply(round, { type: 'DRAW_STOCK' }).ok).toBe(false)
   })
 
-  it('rejects when the stock is empty', () => {
+  it('ends the round when the stock is empty', () => {
     const round = makeRound({ stock: [] })
-    const r = apply(round, { type: 'DRAW_STOCK' })
-    expect(r.ok).toBe(false)
+    const next = expectOk(apply(round, { type: 'DRAW_STOCK' }))
+    expect(next.over).toBe(true)
+    expect(next.wentOutSeat).toBeUndefined()
   })
 })
 
 describe('MELD', () => {
   it('accepts an initial meld that meets the minimum', () => {
     // three Aces = 60 points, clears the 50 minimum at score 0.
-    const hand = [card('A', 'clubs'), card('A', 'hearts'), card('A', 'spades')]
+    const aces = [card('A', 'clubs'), card('A', 'hearts'), card('A', 'spades')]
+    // a spare card keeps the hand non-empty (so this isn't a go-out).
+    const hand = [...aces, card('9', 'diamonds')]
     const round = makeRound({ hand, phase: 'action', score: 0 })
     const next = expectOk(
-      apply(round, { type: 'MELD', melds: [hand.map((c) => c.id)] }),
+      apply(round, { type: 'MELD', melds: [aces.map((c) => c.id)] }),
     )
     expect(next.teams[0]!.hasMelded).toBe(true)
     expect(next.teams[0]!.melds[0]!.cards).toHaveLength(3)
-    expect(next.players[0]!.hand).toHaveLength(0)
+    expect(next.players[0]!.hand).toHaveLength(1)
   })
 
   it('rejects an initial meld below the minimum', () => {
@@ -132,7 +136,7 @@ describe('LAYOFF', () => {
     }
     const extra = card('K', 'diamonds')
     const round = makeRound({
-      hand: [extra],
+      hand: [extra, card('9', 'spades')], // spare card -> not a go-out
       phase: 'action',
       hasMelded: true,
       melds: [existing],
@@ -141,7 +145,7 @@ describe('LAYOFF', () => {
       apply(round, { type: 'LAYOFF', cardIds: [extra.id], targetRank: 'K' }),
     )
     expect(next.teams[0]!.melds[0]!.cards).toHaveLength(4)
-    expect(next.players[0]!.hand).toHaveLength(0)
+    expect(next.players[0]!.hand).toHaveLength(1)
   })
 
   it('rejects laying off before the initial meld', () => {

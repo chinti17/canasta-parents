@@ -47,9 +47,14 @@ export interface RoundState {
   phase: TurnPhase
   /** Set when the current player took the discard pile this turn. */
   tookDiscard: boolean
+  /** Each team's `hasMelded` as of the start of the current turn (for the
+   *  concealed go-out bonus). */
+  turnStartHasMelded: boolean[]
   over: boolean
   /** Seat of the player who went out, if the round ended that way. */
   wentOutSeat?: number
+  /** True if that player went out concealed (team had not melded before). */
+  wentOutConcealed?: boolean
 }
 
 export interface GameConfig {
