@@ -15,6 +15,8 @@ import { DEFAULT_CONFIG } from '../engine/types'
 import Seat from './Seat'
 import Hand from './Hand'
 import TeamMelds from './TeamMelds'
+import CenterTable from './CenterTable'
+import Scoreboard from './Scoreboard'
 
 const SPECTATOR_SEAT = -1
 const STEP_MS = 700
@@ -63,15 +65,14 @@ export default function GameView() {
         </span>
       </header>
 
+      <Scoreboard teams={round.teams} scores={session.scores} />
+
       {/* Opponents */}
       <section className="grid grid-cols-2 gap-2">
         {opponents.map(seatChip)}
       </section>
 
-      {/* Center table — discard/stock/scores arrive in the next commit */}
-      <section className="flex items-center justify-center rounded-lg border border-white/10 bg-green-800/50 p-3 text-center text-xs text-white/50">
-        table centre (discard · stock · scores) — coming next
-      </section>
+      <CenterTable round={round} />
 
       {/* Melds, grouped by team */}
       <section className="grid gap-2">
