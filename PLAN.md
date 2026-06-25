@@ -216,6 +216,37 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 ---
 
+### Phase 8 — Front door & UX pass (post-v1)
+
+**Why:** Phases 5–7 jump straight onto the table — the app deals a game the instant
+it loads and (via autosave) can drop you back into a half-finished game mid-action.
+There is no beginning: no title screen, no explicit New/Resume choice, no orientation.
+This phase gives the game a **front door** and tidies the rough edges a play-test and a
+code review surface.
+
+**Objective:** A clear entry journey — the player chooses to start or resume, and the
+first turn is self-explanatory — plus the fixes from a code review of Phases 5–7.
+
+**Commit-plan:**
+
+- [ ] `feat(ui): start screen (title + New Game / Resume) instead of auto-starting`
+- [ ] `feat(ui): resume only on explicit choice; show a saved-game summary, never auto-drop mid-game`
+- [ ] `feat(ui): "How to play" panel (reachable from start screen and a '?' on the table)`
+- [ ] `feat(ui): first-turn nudge so the table is self-explanatory without the README`
+- [ ] `fix(ui): apply code-review findings from Phases 5–7` _(to be enumerated after review)_
+- [ ] `test(ui): start-screen / resume flow`
+
+> **Process note:** run a code review of the Phase 5–7 UI first; enumerate its findings
+> as concrete sub-items under the `fix(ui)` line above before building, so Phase 8 covers
+> both the front-door work **and** the review cleanups in one pass.
+
+**Outcome:** Loading the app shows a start screen; New Game deals fresh and Resume
+continues a saved game by explicit choice; a player can learn the controls in-app; and the
+known issues from the Phase 5–7 review are resolved. Scope stays minimal — no accounts,
+no settings sprawl.
+
+---
+
 ## 5. Explicitly out of scope for v1 (future phases)
 
 - Python/FastAPI multiplayer server (REST + polling) — engine will be ported from the v1 TS engine.
