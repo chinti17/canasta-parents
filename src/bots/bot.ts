@@ -12,12 +12,7 @@ import {
   type RoundState,
 } from '../engine/types'
 import { discardScore, tableValue } from './heuristics'
-import {
-  layoffPlan,
-  naturalNewMelds,
-  takePileOptions,
-  topDiscard,
-} from './moves'
+import { layoffPlan, naturalNewMelds, takePileOptions } from './moves'
 
 /** Apply an action, returning the next round or null if the engine rejects it. */
 function tryApply(
@@ -53,25 +48,35 @@ function chooseDraw(
   const seat = round.currentSeat
   const player = round.players[seat]!
   const team = round.teams[player.teamId]!
-  const before = tableValue(team)
 
+  // Endgame: once the stock is empty, drawing ends the round. Taking the pile
+  // instead would only prolong a stockless cycle that can't replenish, so we
+  // draw to close the round out (the engine ends it when the stock is dry).
+  if (round.stock.length === 0) {
+    const drawn = tryApply(round, { type: 'DRAW_STOCK' }, config)
+    return { action: { type: 'DRAW_STOCK' }, round: drawn ?? round }
+  }
+
+  const before = tableValue(team)
   let best: { action: Action; round: RoundState; gain: number } | null = null
   for (const option of takePileOptions(round, team, player.hand)) {
     const next = tryApply(round, option, config)
     if (!next) continue
+    // Only take a pile that leaves a discardable hand (or goes out): committing
+    // hand cards to meld the top can otherwise strand us on a single card we
+    // can't legally discard, deadlocking the turn.
+    if (!leavesTurnPlayable(next, seat)) continue
     const gain = tableValue(next.teams[player.teamId]!) - before
     if (!best || gain > best.gain) best = { action: option, round: next, gain }
   }
 
   if (best) {
-    const top = topDiscard(round)!
-    // Note: we deliberately don't treat an empty stock as a reason to take —
-    // when the stock is dry, drawing from it ends the round, and we'd rather
-    // close out than risk recycling the pile forever.
-    const worthIt =
-      !team.hasMelded ||
-      round.discard.cards.length >= 3 ||
-      team.melds.some((m) => m.rank === top.rank)
+    // Take the pile to make our initial meld, or to grab a pile of two or more.
+    // We deliberately skip single-card piles (even ones we could use): taking
+    // never draws from the stock, so always-taking would keep the stock full
+    // and the round could spin forever. Skipping tiny piles forces regular
+    // stock draws, which guarantees the stock depletes and the round ends.
+    const worthIt = !team.hasMelded || round.discard.cards.length >= 2
     if (worthIt) return { action: best.action, round: best.round }
   }
 
