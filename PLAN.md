@@ -206,11 +206,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(ui): round-end scoreboard + next-round flow`
-- [ ] `feat(ui): game-over / winner screen + new game`
-- [ ] `polish: card/transition animations + empty/edge states`
-- [ ] `chore: production build + static hosting config (host-agnostic)`
-- [ ] `docs: how to deploy + how to play`
+- [x] `feat(ui): round-end scoreboard + next-round flow`
+- [x] `feat(ui): game-over / winner screen + new game`
+- [x] `polish: card/transition animations + empty/edge states`
+- [x] `chore: production build + static hosting config (host-agnostic)`
+- [x] `docs: how to deploy + how to play`
 
 **Outcome:** A polished, self-contained static web app that plays full Classic Canasta vs bots on a phone, deployable to any static host. **v1 complete.**
 
