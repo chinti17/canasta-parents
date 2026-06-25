@@ -42,11 +42,15 @@ The **rules engine is an isolated, pure TypeScript module** (`engine/`) with **n
 1. keeps rules testable in isolation, and
 2. makes the eventual **Python/FastAPI port a near-mechanical translation**, not a redesign (we explicitly accept that v1 TS engine will be re-implemented server-side for multiplayer).
 
+### Build constraints
+- **Minimal dependencies.** Lean on the platform and standard tooling; add a package only when it clearly beats writing it ourselves. No state library, no UI-component library, no extra utility libs unless justified. (Core deps for v1: React, Vite, Tailwind, Vitest — that's the intended ceiling.)
+- **Simple, flat folder structure.** Keep the tree shallow and obvious — avoid deep nesting and premature "architecture" folders. Grow structure only when a real need appears.
+
 ---
 
-## 3. Open rules parameters — CONFIRM BEFORE/DURING PHASE 1
+## 3. Rules parameters — ✅ CONFIRMED
 
-Classic Canasta is standardized for **2 or 4 players**. The **6-player / 3-team** form is a variant, so several numbers need an explicit house decision. Proposed defaults below; flag any to change.
+Classic Canasta is standardized for **2 or 4 players**. The **6-player / 3-team** form is a variant, so several numbers needed an explicit house decision. All values below are **confirmed** and the engine is built against them.
 
 | Parameter | Proposed default | Notes |
 |---|---|---|
@@ -55,10 +59,10 @@ Classic Canasta is standardized for **2 or 4 players**. The **6-player / 3-team*
 | Wild cards | Jokers = 50 pts, 2s = 20 pts; **max 3 wilds per meld** | Standard |
 | Red 3 value | **100 each** | 6 red 3s exist across 3 decks |
 | Canasta bonus | Natural **500**, mixed **300** | Standard |
-| Canastas required to go out | **2** | Variant tables with extra decks often require 2; confirm |
+| Canastas required to go out | **2** | Variant tables with extra decks require 2 |
 | Go-out bonus | **100**, concealed **200** | Standard |
 | Initial meld minimum (by team cumulative score) | `<0` → 15, `0–1495` → 50, `1500–2995` → 90, `3000+` → 120 | Standard classic thresholds |
-| Game-winning score | **5000** | Confirm (some play to 8500/10000) |
+| Game-winning score | **5000** | (Some tables play to 8500/10000) |
 | Frozen pile / black 3 rules | Standard classic | Black 3s block discard pile; minimum-count rules apply |
 
 > **Status:** ✅ Confirmed by Rishav (2026-06-25). 11 cards dealt; all other defaults accepted. Engine may be built against these values.
@@ -75,11 +79,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 **Objective:** Stand up the repo, toolchain, and conventions so every later phase is fast and consistent.
 
 **Commit-plan:**
-1. `chore: init Vite + React + TS project`
-2. `chore: add Tailwind CSS + base mobile-first layout shell`
-3. `chore: add ESLint + Prettier + tsconfig strict`
-4. `chore: add Vitest + first smoke test`
-5. `docs: add README with run/build/test instructions`
+- [ ] `chore: init Vite + React + TS project`
+- [ ] `chore: add Tailwind CSS + base mobile-first layout shell`
+- [ ] `chore: add ESLint + Prettier + tsconfig strict`
+- [ ] `chore: add Vitest + first smoke test`
+- [ ] `docs: add README with run/build/test instructions`
 
 **Outcome:** `npm run dev` serves an empty styled shell; `npm test` runs; lint/format enforced. Nothing playable yet.
 
@@ -89,13 +93,13 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 **Objective:** A pure, fully-tested TypeScript engine that models Classic Canasta state and validates/applies legal moves for 6 players / 3 teams.
 
 **Commit-plan:**
-1. `feat(engine): card, deck, and shuffle/deal model (3 decks, 6 jokers)`
-2. `feat(engine): game + round + team + player state types`
-3. `feat(engine): meld validation (naturals, wilds ≤3, canastas)`
-4. `feat(engine): red 3 handling + initial meld minimums`
-5. `feat(engine): draw, discard, and take-the-pile (frozen/black-3 rules)`
-6. `feat(engine): go-out validation + round-end detection`
-7. `test(engine): exhaustive unit tests for each rule path`
+- [ ] `feat(engine): card, deck, and shuffle/deal model (3 decks, 6 jokers)`
+- [ ] `feat(engine): game + round + team + player state types`
+- [ ] `feat(engine): meld validation (naturals, wilds ≤3, canastas)`
+- [ ] `feat(engine): red 3 handling + initial meld minimums`
+- [ ] `feat(engine): draw, discard, and take-the-pile (frozen/black-3 rules)`
+- [ ] `feat(engine): go-out validation + round-end detection`
+- [ ] `test(engine): exhaustive unit tests for each rule path`
 
 **Outcome:** Given a state + action, the engine returns the next state or a rejection with a reason. 100% of rules in §3 covered by tests. No randomness in tests (seeded deals).
 
@@ -105,10 +109,10 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 **Objective:** Correct round and game scoring for 3 teams.
 
 **Commit-plan:**
-1. `feat(engine): meld/canasta/red-3 scoring`
-2. `feat(engine): hand-count penalties + go-out bonuses`
-3. `feat(engine): cumulative game scoring + win detection (to 5000)`
-4. `test(engine): scoring scenarios incl. concealed go-out`
+- [ ] `feat(engine): meld/canasta/red-3 scoring`
+- [ ] `feat(engine): hand-count penalties + go-out bonuses`
+- [ ] `feat(engine): cumulative game scoring + win detection (to 5000)`
+- [ ] `test(engine): scoring scenarios incl. concealed go-out`
 
 **Outcome:** Engine produces a verifiable scoreboard at round end and declares a game winner. Fully tested.
 
@@ -120,11 +124,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 > **3-team note:** With 3 teams there are **two distinct opponent teams**, not one. The bot's opponent model must be an **array of opposing teams** — "avoid feeding" is evaluated **per opponent team** (a discard can be safe for one and lethal for another). Do not collapse opponents into a single entity.
 
 **Commit-plan:**
-1. `feat(bots): legal-move enumeration from engine state`
-2. `feat(bots): heuristic scoring of moves (meld value, pile risk)`
-3. `feat(bots): hold-for-canasta + deny-pile + per-opponent-team avoid-feeding`
-4. `feat(bots): light lookahead for take-pile vs draw decisions`
-5. `test(bots): deterministic bot decisions on fixed states`
+- [ ] `feat(bots): legal-move enumeration from engine state`
+- [ ] `feat(bots): heuristic scoring of moves (meld value, pile risk)`
+- [ ] `feat(bots): hold-for-canasta + deny-pile + per-opponent-team avoid-feeding`
+- [ ] `feat(bots): light lookahead for take-pile vs draw decisions`
+- [ ] `test(bots): deterministic bot decisions on fixed states`
 
 **Outcome:** A bot can play a full turn given any legal state. 5 bots can play a full game to completion headlessly (simulation harness).
 
@@ -136,12 +140,12 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 > **State bridge:** the engine is already a pure `(state, action) => state` reducer, so React will drive it via **`useReducer`** (engine actions = reducer actions) — no extra state library (no Redux/Zustand). Keeps the engine the single source of truth and avoids scattered `useState`.
 
 **Commit-plan:**
-1. `feat(game): turn loop + turn order for 6 seats / 3 teams`
-2. `feat(game): human-action interface (engine actions surfaced for a UI)`
-3. `feat(game): localStorage save/load of full game state`
-4. `feat(game): headless simulation runner (1 human stub + 5 bots)`
-5. `test(game): full game plays start→win without errors`
-6. `test(game): seeded soak run — 10k+ games to surface rule edge-cases (deck depletion, illegal take-pile, stalemates)`
+- [ ] `feat(game): turn loop + turn order for 6 seats / 3 teams`
+- [ ] `feat(game): human-action interface (engine actions surfaced for a UI)`
+- [ ] `feat(game): localStorage save/load of full game state`
+- [ ] `feat(game): headless simulation runner (1 human stub + 5 bots)`
+- [ ] `test(game): full game plays start→win without errors`
+- [ ] `test(game): seeded soak run — 10k+ games to surface rule edge-cases (deck depletion, illegal take-pile, stalemates)`
 
 **Outcome:** `simulate()` runs complete games to a winner. A many-game seeded soak run passes with zero crashes/invalid states. State survives a reload via `localStorage`. UI can now be layered on a stable core.
 
@@ -151,11 +155,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 **Objective:** Render the full game state beautifully on a phone screen — display only, no interaction yet.
 
 **Commit-plan:**
-1. `feat(ui): CSS/SVG card component + deck/back rendering`
-2. `feat(ui): mobile-first 6-seat table layout (3 teams)`
-3. `feat(ui): player hand fan + melds-by-team panels`
-4. `feat(ui): discard pile, stock, scores, turn indicator`
-5. `feat(ui): bind read-only render to live game state`
+- [ ] `feat(ui): CSS/SVG card component + deck/back rendering`
+- [ ] `feat(ui): mobile-first 6-seat table layout (3 teams)`
+- [ ] `feat(ui): player hand fan + melds-by-team panels`
+- [ ] `feat(ui): discard pile, stock, scores, turn indicator`
+- [ ] `feat(ui): bind read-only render to live game state`
 
 **Outcome:** A running game (driven by the headless loop) is fully visible and legible on a phone. No clicks wired yet.
 
@@ -165,12 +169,12 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 **Objective:** Let the human actually play — select, meld, draw, take pile, discard, go out.
 
 **Commit-plan:**
-1. `feat(ui): card selection + draw/discard interactions`
-2. `feat(ui): build/extend meld interactions with legality hints`
-3. `feat(ui): take-the-pile flow incl. frozen-pile rules`
-4. `feat(ui): go-out confirmation + illegal-move feedback`
-5. `feat(ui): bot turn pacing/animation so play is followable`
-6. `test(ui): key interaction flows (component tests)`
+- [ ] `feat(ui): card selection + draw/discard interactions`
+- [ ] `feat(ui): build/extend meld interactions with legality hints`
+- [ ] `feat(ui): take-the-pile flow incl. frozen-pile rules`
+- [ ] `feat(ui): go-out confirmation + illegal-move feedback`
+- [ ] `feat(ui): bot turn pacing/animation so play is followable`
+- [ ] `test(ui): key interaction flows (component tests)`
 
 **Outcome:** A human can play a complete game vs 5 bots end-to-end on a phone, with clear feedback on legal/illegal moves.
 
@@ -180,11 +184,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 **Objective:** Close the loop and ship a hostable static site.
 
 **Commit-plan:**
-1. `feat(ui): round-end scoreboard + next-round flow`
-2. `feat(ui): game-over / winner screen + new game`
-3. `polish: card/transition animations + empty/edge states`
-4. `chore: production build + static hosting config (host-agnostic)`
-5. `docs: how to deploy + how to play`
+- [ ] `feat(ui): round-end scoreboard + next-round flow`
+- [ ] `feat(ui): game-over / winner screen + new game`
+- [ ] `polish: card/transition animations + empty/edge states`
+- [ ] `chore: production build + static hosting config (host-agnostic)`
+- [ ] `docs: how to deploy + how to play`
 
 **Outcome:** A polished, self-contained static web app that plays full Classic Canasta vs bots on a phone, deployable to any static host. **v1 complete.**
 
@@ -198,6 +202,6 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 ## 6. Risks / watch items
 - **6-seat layout on a phone** is the hardest UI problem (Phase 5). Mitigate with collapsible per-team meld panels and a focus on the active turn.
-- **6-player rule ambiguity** (§3) — must be confirmed before Phase 1 to avoid rework.
+- **6-player rule ambiguity** (§3) — ✅ resolved; all values confirmed.
 - **Engine portability** — keep `engine/` free of React/DOM so the Python port stays mechanical.
 - **Pacing (tuning, not a v1 change)** — with 3 decks/6 players, scores may climb faster, so the 5000 target and standard meld thresholds could make games feel short. Confirmed values stay as-is for v1; revisit only if the Phase 4 soak run + real play show games ending too quickly.
