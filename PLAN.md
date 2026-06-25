@@ -189,12 +189,12 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(ui): card selection + draw/discard interactions`
-- [ ] `feat(ui): build/extend meld interactions with legality hints`
-- [ ] `feat(ui): take-the-pile flow incl. frozen-pile rules`
-- [ ] `feat(ui): go-out confirmation + illegal-move feedback`
-- [ ] `feat(ui): bot turn pacing/animation so play is followable`
-- [ ] `test(ui): key interaction flows (component tests)`
+- [x] `feat(ui): card selection + draw/discard interactions`
+- [x] `feat(ui): build/extend meld interactions with legality hints`
+- [x] `feat(ui): take-the-pile flow incl. frozen-pile rules`
+- [x] `feat(ui): go-out confirmation + illegal-move feedback`
+- [x] `feat(ui): bot turn pacing/animation so play is followable`
+- [x] `test(ui): key interaction flows (component tests)`
 
 **Outcome:** A human can play a complete game vs 5 bots end-to-end on a phone, with clear feedback on legal/illegal moves.
 
