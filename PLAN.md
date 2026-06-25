@@ -117,10 +117,12 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ### Phase 3 — Bot AI (stronger heuristics + light lookahead)
 **Objective:** Bots that choose sensible legal actions and make the game fun to play.
 
+> **3-team note:** With 3 teams there are **two distinct opponent teams**, not one. The bot's opponent model must be an **array of opposing teams** — "avoid feeding" is evaluated **per opponent team** (a discard can be safe for one and lethal for another). Do not collapse opponents into a single entity.
+
 **Commit-plan:**
 1. `feat(bots): legal-move enumeration from engine state`
 2. `feat(bots): heuristic scoring of moves (meld value, pile risk)`
-3. `feat(bots): hold-for-canasta + deny-pile + avoid-feeding logic`
+3. `feat(bots): hold-for-canasta + deny-pile + per-opponent-team avoid-feeding`
 4. `feat(bots): light lookahead for take-pile vs draw decisions`
 5. `test(bots): deterministic bot decisions on fixed states`
 
@@ -131,14 +133,17 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ### Phase 4 — Game orchestration (headless single-player session)
 **Objective:** Tie engine + bots into a runnable turn loop with autosave — still no UI.
 
+> **State bridge:** the engine is already a pure `(state, action) => state` reducer, so React will drive it via **`useReducer`** (engine actions = reducer actions) — no extra state library (no Redux/Zustand). Keeps the engine the single source of truth and avoids scattered `useState`.
+
 **Commit-plan:**
 1. `feat(game): turn loop + turn order for 6 seats / 3 teams`
 2. `feat(game): human-action interface (engine actions surfaced for a UI)`
 3. `feat(game): localStorage save/load of full game state`
 4. `feat(game): headless simulation runner (1 human stub + 5 bots)`
 5. `test(game): full game plays start→win without errors`
+6. `test(game): seeded soak run — 10k+ games to surface rule edge-cases (deck depletion, illegal take-pile, stalemates)`
 
-**Outcome:** `simulate()` runs complete games to a winner. State survives a reload via `localStorage`. UI can now be layered on a stable core.
+**Outcome:** `simulate()` runs complete games to a winner. A many-game seeded soak run passes with zero crashes/invalid states. State survives a reload via `localStorage`. UI can now be layered on a stable core.
 
 ---
 
@@ -195,3 +200,4 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 - **6-seat layout on a phone** is the hardest UI problem (Phase 5). Mitigate with collapsible per-team meld panels and a focus on the active turn.
 - **6-player rule ambiguity** (§3) — must be confirmed before Phase 1 to avoid rework.
 - **Engine portability** — keep `engine/` free of React/DOM so the Python port stays mechanical.
+- **Pacing (tuning, not a v1 change)** — with 3 decks/6 players, scores may climb faster, so the 5000 target and standard meld thresholds could make games feel short. Confirmed values stay as-is for v1; revisit only if the Phase 4 soak run + real play show games ending too quickly.
