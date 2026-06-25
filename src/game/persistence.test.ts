@@ -7,6 +7,7 @@ import {
   saveSession,
   serializeSession,
   STORAGE_KEY,
+  summarizeSave,
   type StorageLike,
 } from './persistence'
 
@@ -60,5 +61,21 @@ describe('persistence', () => {
     expect(saveSession(createSession(1), undefined)).toBe(false)
     expect(loadSession(undefined)).toBeNull()
     expect(() => clearSession(undefined)).not.toThrow()
+  })
+
+  it('rejects a save whose human seat is not a playable seat', () => {
+    // A spectator-style session (humanSeat -1) must not be resumable.
+    const spectator = { ...createSession(1), humanSeat: -1 }
+    expect(deserializeSession(serializeSession(spectator))).toBeNull()
+  })
+})
+
+describe('summarizeSave', () => {
+  it('summarizes round, scores, and whose turn it is', () => {
+    const summary = summarizeSave(createSession(7))
+    expect(summary.round).toBe(1)
+    expect(summary.scores).toEqual([0, 0, 0])
+    expect(summary.yourTurn).toBe(true) // seat 0 == humanSeat 0 on the first deal
+    expect(summary.currentSeat).toBe(0)
   })
 })
