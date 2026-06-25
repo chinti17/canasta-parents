@@ -87,11 +87,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `chore: init Vite + React + TS project`
-- [ ] `chore: add Tailwind CSS + base mobile-first layout shell`
-- [ ] `chore: add ESLint + Prettier + tsconfig strict`
-- [ ] `chore: add Vitest + first smoke test`
-- [ ] `docs: add README with run/build/test instructions`
+- [x] `chore: init Vite + React + TS project`
+- [x] `chore: add Tailwind CSS + base mobile-first layout shell`
+- [x] `chore: add ESLint + Prettier + tsconfig strict`
+- [x] `chore: add Vitest + first smoke test`
+- [ ] `docs: add README with run/build/test instructions` _(deferred — README intentionally empty for now)_
 
 **Outcome:** `npm run dev` serves an empty styled shell; `npm test` runs; lint/format enforced. Nothing playable yet.
 
