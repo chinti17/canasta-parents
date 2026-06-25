@@ -233,12 +233,34 @@ first turn is self-explanatory — plus the fixes from a code review of Phases 5
 - [ ] `feat(ui): resume only on explicit choice; show a saved-game summary, never auto-drop mid-game`
 - [ ] `feat(ui): "How to play" panel (reachable from start screen and a '?' on the table)`
 - [ ] `feat(ui): first-turn nudge so the table is self-explanatory without the README`
-- [ ] `fix(ui): apply code-review findings from Phases 5–7` _(to be enumerated after review)_
 - [ ] `test(ui): start-screen / resume flow`
 
-> **Process note:** run a code review of the Phase 5–7 UI first; enumerate its findings
-> as concrete sub-items under the `fix(ui)` line above before building, so Phase 8 covers
-> both the front-door work **and** the review cleanups in one pass.
+**Code-review findings to fix (review of Phases 5–7, 2026-06-25):**
+
+- [ ] `fix(ui): human draw-phase deadlock on stock-out` — when the stock is empty and no
+      take-pile option exists, `Draw stock` is disabled (`canDrawStock = drawing &&
+      stock.length>0`) and the human has no control to act with. The engine ends the round
+      on `DRAW_STOCK` from an empty stock, but the UI can't trigger it. Offer an explicit
+      "end turn / stock out" path (or let the disabled draw pass through to end the round).
+      **[High — correctness]**
+- [ ] `fix(ui): don't silently resume a saved game` — `GameView.init()` does
+      `loadSession() ?? createSession(...)`, dropping the player mid-game with no choice and
+      no validation the save fits the current build/`humanSeat`. This is the reported
+      "it just starts / I'm confused." The start-screen Resume flow above resolves it;
+      also validate the save (bump `SCHEMA_VERSION` / check `humanSeat`) before resuming.
+      **[High — UX/correctness]**
+- [ ] `fix(ui): meld hint shown for non-meld selections` — in the action phase the hint
+      always reports a *meld* rejection, so selecting one card to discard shows
+      "a meld needs at least 3 cards", which looks like an error when discarding is legal.
+      Only hint when a meld is actually being attempted, or word it neutrally. **[Med — UX]**
+- [ ] `perf(ui): memoize availableActions in ActionBar` — `availableActions(round)` runs
+      bot-style move enumeration (incl. `takePileOptions`) on every render, even off-turn.
+      Memoize on round/phase. **[Low — efficiency]**
+
+> **Process note (done):** a focused review of the Phase 5–7 UI (controller, session,
+> ActionBar, GameView, Hand, round-end/game-over) produced the four items above. It was a
+> targeted manual pass, not the full multi-agent `ultra` fan-out — if you want deeper
+> coverage before building, run `/code-review ultra` and append anything new here.
 
 **Outcome:** Loading the app shows a start screen; New Game deals fresh and Resume
 continues a saved game by explicit choice; a player can learn the controls in-app; and the
