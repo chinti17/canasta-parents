@@ -9,7 +9,9 @@
 import type { GameSession } from './session'
 
 export const STORAGE_KEY = 'canasta:session'
-export const SCHEMA_VERSION = 1
+// v2: front-door release. Bumped so pre-front-door / spectator saves (which
+// could carry a non-human humanSeat) are rejected rather than resumed.
+export const SCHEMA_VERSION = 2
 
 /** The slice of the Web Storage API we rely on (injectable for tests). */
 export interface StorageLike {
@@ -57,7 +59,38 @@ export function deserializeSession(json: string): GameSession | null {
   ) {
     return null
   }
-  return (parsed as Envelope).session
+  const session = (parsed as Envelope).session
+  // Reject saves whose human seat isn't a real, playable seat (e.g. a
+  // spectator session): resuming one would leave the player with no turn.
+  if (
+    typeof session.humanSeat !== 'number' ||
+    session.humanSeat < 0 ||
+    session.humanSeat >= session.config.numPlayers
+  ) {
+    return null
+  }
+  return session
+}
+
+export interface SaveSummary {
+  /** 1-based round number for display. */
+  round: number
+  /** Cumulative team scores. */
+  scores: number[]
+  /** Whether it's the human's turn to act right now. */
+  yourTurn: boolean
+  /** Seat whose turn it is (for "P3 to draw" style labels). */
+  currentSeat: number
+}
+
+/** A short, display-friendly summary of a saved game (for the Resume card). */
+export function summarizeSave(session: GameSession): SaveSummary {
+  return {
+    round: session.roundNumber + 1,
+    scores: session.scores,
+    yourTurn: session.round.currentSeat === session.humanSeat,
+    currentSeat: session.round.currentSeat,
+  }
 }
 
 /**

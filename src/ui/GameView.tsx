@@ -7,14 +7,12 @@
 
 import { useEffect, useReducer, useState } from 'react'
 import {
-  createSession,
   dispatch as sessionDispatch,
   isBotTurn,
   isHumanTurn,
   type GameSession,
 } from '../game/session'
-import { loadSession, saveSession } from '../game/persistence'
-import { DEFAULT_CONFIG } from '../engine/types'
+import { clearSession, saveSession } from '../game/persistence'
 import Seat from './Seat'
 import Hand from './Hand'
 import TeamMelds from './TeamMelds'
@@ -33,18 +31,22 @@ import {
 const HUMAN_SEAT = 0
 const BOT_STEP_MS = 800
 
-function init(): GameSession {
-  // Resume an autosaved game if one exists, otherwise deal a fresh one.
-  return loadSession() ?? createSession(1, DEFAULT_CONFIG, HUMAN_SEAT)
+interface GameViewProps {
+  /** The session to play — created by the start screen (New Game or Resume). */
+  initialSession: GameSession
+  /** Return to the start screen (front door). */
+  onHome: () => void
 }
 
-export default function GameView() {
-  const [session, dispatch] = useReducer(sessionDispatch, undefined, init)
+export default function GameView({ initialSession, onHome }: GameViewProps) {
+  const [session, dispatch] = useReducer(sessionDispatch, initialSession)
   const [ui, setUi] = useState<UiState>(initialUiState)
 
-  // Autosave to localStorage so a refresh or return resumes the game.
+  // Autosave so a refresh resumes the game — but forget a finished game so the
+  // start screen never offers to "resume" something that's already over.
   useEffect(() => {
-    saveSession(session)
+    if (session.over) clearSession()
+    else saveSession(session)
   }, [session])
 
   // Let bots play themselves on a timer; pause for the human, between rounds,
@@ -94,9 +96,13 @@ export default function GameView() {
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-3 bg-green-900 p-3 text-white">
       <header className="flex items-center justify-between text-xs text-green-200">
         <span className="font-semibold">Canasta</span>
-        <span className="rounded bg-black/20 px-1.5 py-0.5">
-          1 human · 5 bots
-        </span>
+        <button
+          type="button"
+          onClick={onHome}
+          className="rounded bg-black/20 px-1.5 py-0.5 hover:bg-black/30"
+        >
+          ☰ Menu
+        </button>
       </header>
 
       {!round.over && (
