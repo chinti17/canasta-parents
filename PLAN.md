@@ -138,11 +138,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(bots): legal-move enumeration from engine state`
-- [ ] `feat(bots): heuristic scoring of moves (meld value, pile risk)`
-- [ ] `feat(bots): hold-for-canasta + deny-pile + per-opponent-team avoid-feeding`
-- [ ] `feat(bots): light lookahead for take-pile vs draw decisions`
-- [ ] `test(bots): deterministic bot decisions on fixed states`
+- [x] `feat(bots): legal-move enumeration from engine state`
+- [x] `feat(bots): heuristic scoring of moves (meld value, pile risk)`
+- [x] `feat(bots): hold-for-canasta + deny-pile + per-opponent-team avoid-feeding`
+- [x] `feat(bots): light lookahead for take-pile vs draw decisions`
+- [x] `test(bots): deterministic bot decisions on fixed states`
 
 **Outcome:** A bot can play a full turn given any legal state. 5 bots can play a full game to completion headlessly (simulation harness).
 
