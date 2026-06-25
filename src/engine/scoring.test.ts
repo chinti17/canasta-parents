@@ -2,13 +2,14 @@ import { describe, expect, it } from 'vitest'
 import type { Card } from './cards'
 import {
   canastaBonus,
+  finishRound,
   goOutBonus,
   handPenalty,
   meldCardPoints,
   redThreeBonus,
   scoreRound,
 } from './scoring'
-import type { Meld, RoundState, TeamState } from './types'
+import { DEFAULT_CONFIG, type Meld, type RoundState, type TeamState } from './types'
 
 let n = 0
 const card = (rank: Card['rank'], suit?: Card['suit']): Card => ({
@@ -164,5 +165,33 @@ describe('scoreRound', () => {
       total: 670,
     })
     expect(s1!.total).toBe(-40)
+  })
+})
+
+describe('finishRound', () => {
+  it('adds round totals onto cumulative scores carried in', () => {
+    const round = roundWith({
+      team0Melds: [meld('K', seq('K', 7))],
+      team0Melded: true,
+      wentOutSeat: 0,
+    })
+    round.teams[0]!.score = 1000
+    round.teams[1]!.score = 800
+    const result = finishRound(round, DEFAULT_CONFIG)
+    // team0 round total = 70 + 500 + 100 = 670 -> 1670 cumulative
+    expect(result.cumulative).toEqual([1670, 800])
+    expect(result.gameOver).toBe(false)
+  })
+
+  it('ends the game and names the winner when a team reaches the target', () => {
+    const round = roundWith({
+      team0Melds: [meld('K', seq('K', 7))],
+      team0Melded: true,
+      wentOutSeat: 0,
+    })
+    round.teams[0]!.score = DEFAULT_CONFIG.targetScore // already at target
+    const result = finishRound(round, DEFAULT_CONFIG)
+    expect(result.gameOver).toBe(true)
+    expect(result.winningTeam).toBe(0)
   })
 })

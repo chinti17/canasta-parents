@@ -2,7 +2,7 @@
 
 import { cardValue } from './cards'
 import { canastaType } from './melds'
-import type { Meld, RoundState, TeamState } from './types'
+import type { GameConfig, Meld, RoundState, TeamState } from './types'
 
 const NATURAL_CANASTA_BONUS = 500
 const MIXED_CANASTA_BONUS = 300
@@ -86,4 +86,40 @@ export function scoreRound(round: RoundState): TeamRoundScore[] {
       total: meldPoints + canasta + red3 + goOut - penalty,
     }
   })
+}
+
+export interface RoundResult {
+  scores: TeamRoundScore[]
+  /** New cumulative game scores by team id, after adding this round. */
+  cumulative: number[]
+  gameOver: boolean
+  /** Team with the highest cumulative score, set only when the game is over. */
+  winningTeam?: number
+}
+
+/**
+ * Score a completed round and fold the results into cumulative game scores.
+ * The game ends when any team reaches the target; on a tie the highest score
+ * wins (lowest team id breaks an exact tie).
+ */
+export function finishRound(
+  round: RoundState,
+  config: GameConfig,
+): RoundResult {
+  const scores = scoreRound(round)
+  const cumulative = round.teams.map(
+    (team) => team.score + scores[team.id]!.total,
+  )
+
+  const gameOver = cumulative.some((s) => s >= config.targetScore)
+  let winningTeam: number | undefined
+  if (gameOver) {
+    let best = 0
+    for (let i = 1; i < cumulative.length; i++) {
+      if (cumulative[i]! > cumulative[best]!) best = i
+    }
+    winningTeam = best
+  }
+
+  return { scores, cumulative, gameOver, winningTeam }
 }
