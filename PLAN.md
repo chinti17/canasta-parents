@@ -15,34 +15,40 @@
 ## 2. Locked decisions
 
 ### Frontend
-| Decision | Choice |
-|---|---|
-| Framework | **React 18 + TypeScript** (Vite) |
-| Device target | **Mobile-first** (phone primary; must also work on desktop) |
-| Card visuals | **CSS/SVG-drawn cards** (no image assets, restyleable, crisp) |
-| Styling | **Tailwind CSS** |
+
+| Decision      | Choice                                                        |
+| ------------- | ------------------------------------------------------------- |
+| Framework     | **React 18 + TypeScript** (Vite)                              |
+| Device target | **Mobile-first** (phone primary; must also work on desktop)   |
+| Card visuals  | **CSS/SVG-drawn cards** (no image assets, restyleable, crisp) |
+| Styling       | **Tailwind CSS**                                              |
 
 ### Backend / architecture
-| Decision | Choice |
-|---|---|
-| v1 architecture | **Client-only** — all rules + bots run in the browser. **No server in v1.** |
-| Future multiplayer server | **Python + FastAPI** |
-| Future transport | **REST + polling** |
-| Persistence (v1) | **Browser `localStorage`** autosave (resume on refresh/return) |
-| Hosting | **Decide later** — keep the build host-agnostic (static site for v1) |
+
+| Decision                  | Choice                                                                      |
+| ------------------------- | --------------------------------------------------------------------------- |
+| v1 architecture           | **Client-only** — all rules + bots run in the browser. **No server in v1.** |
+| Future multiplayer server | **Python + FastAPI**                                                        |
+| Future transport          | **REST + polling**                                                          |
+| Persistence (v1)          | **Browser `localStorage`** autosave (resume on refresh/return)              |
+| Hosting                   | **Decide later** — keep the build host-agnostic (static site for v1)        |
 
 ### Gameplay
-| Decision | Choice |
-|---|---|
-| Bots | **Stronger heuristics + light lookahead** (hold for canasta, deny pile, avoid feeding opponents) |
-| Save/resume | **Yes**, via `localStorage` |
+
+| Decision    | Choice                                                                                           |
+| ----------- | ------------------------------------------------------------------------------------------------ |
+| Bots        | **Stronger heuristics + light lookahead** (hold for canasta, deny pile, avoid feeding opponents) |
+| Save/resume | **Yes**, via `localStorage`                                                                      |
 
 ### Key architectural principle
+
 The **rules engine is an isolated, pure TypeScript module** (`engine/`) with **no React and no DOM dependencies**. It takes game state + an action and returns new state. This:
+
 1. keeps rules testable in isolation, and
 2. makes the eventual **Python/FastAPI port a near-mechanical translation**, not a redesign (we explicitly accept that v1 TS engine will be re-implemented server-side for multiplayer).
 
 ### Build constraints
+
 - **Minimal dependencies.** Lean on the platform and standard tooling; add a package only when it clearly beats writing it ourselves. No state library, no UI-component library, no extra utility libs unless justified. (Core deps for v1: React, Vite, Tailwind, Vitest — that's the intended ceiling.)
 - **Simple, flat folder structure.** Keep the tree shallow and obvious — avoid deep nesting and premature "architecture" folders. Grow structure only when a real need appears.
 
@@ -52,18 +58,18 @@ The **rules engine is an isolated, pure TypeScript module** (`engine/`) with **n
 
 Classic Canasta is standardized for **2 or 4 players**. The **6-player / 3-team** form is a variant, so several numbers needed an explicit house decision. All values below are **confirmed** and the engine is built against them.
 
-| Parameter | Proposed default | Notes |
-|---|---|---|
-| Number of decks | **3 standard decks + 6 jokers** (162 cards) | Common for 5–6 players |
-| Cards dealt per player | **11** | Confirmed (same as classic 4-player). |
-| Wild cards | Jokers = 50 pts, 2s = 20 pts; **max 3 wilds per meld** | Standard |
-| Red 3 value | **100 each** | 6 red 3s exist across 3 decks |
-| Canasta bonus | Natural **500**, mixed **300** | Standard |
-| Canastas required to go out | **2** | Variant tables with extra decks require 2 |
-| Go-out bonus | **100**, concealed **200** | Standard |
-| Initial meld minimum (by team cumulative score) | `<0` → 15, `0–1495` → 50, `1500–2995` → 90, `3000+` → 120 | Standard classic thresholds |
-| Game-winning score | **5000** | (Some tables play to 8500/10000) |
-| Frozen pile / black 3 rules | Standard classic | Black 3s block discard pile; minimum-count rules apply |
+| Parameter                                       | Proposed default                                          | Notes                                                  |
+| ----------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------ |
+| Number of decks                                 | **3 standard decks + 6 jokers** (162 cards)               | Common for 5–6 players                                 |
+| Cards dealt per player                          | **11**                                                    | Confirmed (same as classic 4-player).                  |
+| Wild cards                                      | Jokers = 50 pts, 2s = 20 pts; **max 3 wilds per meld**    | Standard                                               |
+| Red 3 value                                     | **100 each**                                              | 6 red 3s exist across 3 decks                          |
+| Canasta bonus                                   | Natural **500**, mixed **300**                            | Standard                                               |
+| Canastas required to go out                     | **2**                                                     | Variant tables with extra decks require 2              |
+| Go-out bonus                                    | **100**, concealed **200**                                | Standard                                               |
+| Initial meld minimum (by team cumulative score) | `<0` → 15, `0–1495` → 50, `1500–2995` → 90, `3000+` → 120 | Standard classic thresholds                            |
+| Game-winning score                              | **5000**                                                  | (Some tables play to 8500/10000)                       |
+| Frozen pile / black 3 rules                     | Standard classic                                          | Black 3s block discard pile; minimum-count rules apply |
 
 > **Status:** ✅ Confirmed by Rishav (2026-06-25). 11 cards dealt; all other defaults accepted. Engine may be built against these values.
 
@@ -76,9 +82,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 0 — Scaffolding & guardrails
+
 **Objective:** Stand up the repo, toolchain, and conventions so every later phase is fast and consistent.
 
 **Commit-plan:**
+
 - [ ] `chore: init Vite + React + TS project`
 - [ ] `chore: add Tailwind CSS + base mobile-first layout shell`
 - [ ] `chore: add ESLint + Prettier + tsconfig strict`
@@ -90,9 +98,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 1 — Rules engine: data model & core moves (no UI, no bots)
+
 **Objective:** A pure, fully-tested TypeScript engine that models Classic Canasta state and validates/applies legal moves for 6 players / 3 teams.
 
 **Commit-plan:**
+
 - [ ] `feat(engine): card, deck, and shuffle/deal model (3 decks, 6 jokers)`
 - [ ] `feat(engine): game + round + team + player state types`
 - [ ] `feat(engine): meld validation (naturals, wilds ≤3, canastas)`
@@ -106,9 +116,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 2 — Scoring engine
+
 **Objective:** Correct round and game scoring for 3 teams.
 
 **Commit-plan:**
+
 - [ ] `feat(engine): meld/canasta/red-3 scoring`
 - [ ] `feat(engine): hand-count penalties + go-out bonuses`
 - [ ] `feat(engine): cumulative game scoring + win detection (to 5000)`
@@ -119,11 +131,13 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 3 — Bot AI (stronger heuristics + light lookahead)
+
 **Objective:** Bots that choose sensible legal actions and make the game fun to play.
 
 > **3-team note:** With 3 teams there are **two distinct opponent teams**, not one. The bot's opponent model must be an **array of opposing teams** — "avoid feeding" is evaluated **per opponent team** (a discard can be safe for one and lethal for another). Do not collapse opponents into a single entity.
 
 **Commit-plan:**
+
 - [ ] `feat(bots): legal-move enumeration from engine state`
 - [ ] `feat(bots): heuristic scoring of moves (meld value, pile risk)`
 - [ ] `feat(bots): hold-for-canasta + deny-pile + per-opponent-team avoid-feeding`
@@ -135,11 +149,13 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 4 — Game orchestration (headless single-player session)
+
 **Objective:** Tie engine + bots into a runnable turn loop with autosave — still no UI.
 
 > **State bridge:** the engine is already a pure `(state, action) => state` reducer, so React will drive it via **`useReducer`** (engine actions = reducer actions) — no extra state library (no Redux/Zustand). Keeps the engine the single source of truth and avoids scattered `useState`.
 
 **Commit-plan:**
+
 - [ ] `feat(game): turn loop + turn order for 6 seats / 3 teams`
 - [ ] `feat(game): human-action interface (engine actions surfaced for a UI)`
 - [ ] `feat(game): localStorage save/load of full game state`
@@ -152,9 +168,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 5 — UI: table, hands, melds (mobile-first, read-only render)
+
 **Objective:** Render the full game state beautifully on a phone screen — display only, no interaction yet.
 
 **Commit-plan:**
+
 - [ ] `feat(ui): CSS/SVG card component + deck/back rendering`
 - [ ] `feat(ui): mobile-first 6-seat table layout (3 teams)`
 - [ ] `feat(ui): player hand fan + melds-by-team panels`
@@ -166,9 +184,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 6 — Interaction & turn flow
+
 **Objective:** Let the human actually play — select, meld, draw, take pile, discard, go out.
 
 **Commit-plan:**
+
 - [ ] `feat(ui): card selection + draw/discard interactions`
 - [ ] `feat(ui): build/extend meld interactions with legality hints`
 - [ ] `feat(ui): take-the-pile flow incl. frozen-pile rules`
@@ -181,9 +201,11 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ### Phase 7 — Round/game end, polish & deploy
+
 **Objective:** Close the loop and ship a hostable static site.
 
 **Commit-plan:**
+
 - [ ] `feat(ui): round-end scoreboard + next-round flow`
 - [ ] `feat(ui): game-over / winner screen + new game`
 - [ ] `polish: card/transition animations + empty/edge states`
@@ -195,12 +217,14 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 ---
 
 ## 5. Explicitly out of scope for v1 (future phases)
+
 - Python/FastAPI multiplayer server (REST + polling) — engine will be ported from the v1 TS engine.
 - Real-time multi-human lobbies, matchmaking, accounts.
 - Reconnect handling across devices, server-side persistence.
 - Spectators, chat, replays.
 
 ## 6. Risks / watch items
+
 - **6-seat layout on a phone** is the hardest UI problem (Phase 5). Mitigate with collapsible per-team meld panels and a focus on the active turn.
 - **6-player rule ambiguity** (§3) — ✅ resolved; all values confirmed.
 - **Engine portability** — keep `engine/` free of React/DOM so the Python port stays mechanical.
