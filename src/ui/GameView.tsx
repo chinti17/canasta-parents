@@ -41,6 +41,8 @@ interface GameViewProps {
 export default function GameView({ initialSession, onHome }: GameViewProps) {
   const [session, dispatch] = useReducer(sessionDispatch, initialSession)
   const [ui, setUi] = useState<UiState>(initialUiState)
+  // One-time first-turn nudge, dismissed on the player's first action.
+  const [tipDismissed, setTipDismissed] = useState(false)
 
   // Autosave so a refresh resumes the game — but forget a finished game so the
   // start screen never offers to "resume" something that's already over.
@@ -66,12 +68,17 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
       intent,
     )
     setUi(nextUi)
-    if (action) dispatch({ type: 'PLAYER_ACTION', action })
+    if (action) {
+      dispatch({ type: 'PLAYER_ACTION', action })
+      setTipDismissed(true)
+    }
   }
 
   const { round } = session
   const betweenRounds = round.over && !session.over
   const myTurn = isHumanTurn(session)
+  // Show the new-player nudge only on the opening turn, until first acted.
+  const showTip = myTurn && !tipDismissed && session.roundNumber === 0
   const acting = myTurn && round.phase === 'action'
   const opponents = round.players
     .map((p) => p.seat)
@@ -149,6 +156,12 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
           />
         ) : (
           <>
+            {showTip && (
+              <div className="animate-fade-in rounded-md border border-yellow-400/40 bg-yellow-400/10 px-3 py-2 text-[0.7rem] text-yellow-100">
+                👋 Your turn. First <b>draw the stock</b> (or take the pile), then
+                tap cards to <b>meld</b> and <b>discard</b> one to finish.
+              </div>
+            )}
             {seatChip(HUMAN_SEAT)}
             <Hand
               hand={round.players[HUMAN_SEAT]!.hand}
