@@ -103,13 +103,13 @@ Each phase: **Objective → Commit-plan → Outcome.** Phases are ordered so the
 
 **Commit-plan:**
 
-- [ ] `feat(engine): card, deck, and shuffle/deal model (3 decks, 6 jokers)`
-- [ ] `feat(engine): game + round + team + player state types`
-- [ ] `feat(engine): meld validation (naturals, wilds ≤3, canastas)`
-- [ ] `feat(engine): red 3 handling + initial meld minimums`
-- [ ] `feat(engine): draw, discard, and take-the-pile (frozen/black-3 rules)`
-- [ ] `feat(engine): go-out validation + round-end detection`
-- [ ] `test(engine): exhaustive unit tests for each rule path`
+- [x] `feat(engine): card, deck, and shuffle/deal model (3 decks, 6 jokers)`
+- [x] `feat(engine): game + round + team + player state types`
+- [x] `feat(engine): meld validation (naturals, wilds ≤3, canastas)`
+- [x] `feat(engine): red 3 handling + initial meld minimums`
+- [x] `feat(engine): draw, discard, and take-the-pile (frozen/black-3 rules)`
+- [x] `feat(engine): go-out validation + round-end detection`
+- [x] `test(engine): exhaustive unit tests for each rule path`
 
 **Outcome:** Given a state + action, the engine returns the next state or a rejection with a reason. 100% of rules in §3 covered by tests. No randomness in tests (seeded deals).
 
