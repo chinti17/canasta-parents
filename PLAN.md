@@ -283,18 +283,18 @@ the feed is derived by diffing round state in a pure, testable helper.
 
 **Commit-plan:**
 
-- [ ] `feat(ui): recent-discards row` — render the discard pile as a fanned row of the
+- [x] `feat(ui): recent-discards row` — render the discard pile as a fanned row of the
       last few **real cards** (most-recent highlighted), not just the single top card;
       keep the count + ❄ frozen badge.
-- [ ] `feat(ui): summarizePlay(before, after)` — a pure helper that diffs two round states
+- [x] `feat(ui): summarizePlay(before, after)` — a pure helper that diffs two round states
       into a play entry (acting seat + parts: drew / melded \[cards] / took the pile /
       discarded \[card] / went out / red 3). No engine instrumentation.
-- [ ] `feat(ui): play feed` — a short scrolling list of recent turns rendered with seat
+- [x] `feat(ui): play feed` — a short scrolling list of recent turns rendered with seat
       label, team colour, and small card images; fed by `summarizePlay`, capped to the
       last ~8 entries, ephemeral (UI state, not persisted).
-- [ ] `feat(ui): team/partner labels on seats` — show each seat's team (A/B/C) and mark
+- [x] `feat(ui): team/partner labels on seats` — show each seat's team (A/B/C) and mark
       your partner, so the three teams read clearly.
-- [ ] `test(ui): summarizePlay across draw / meld / discard / take-pile / go-out`
+- [x] `test(ui): summarizePlay across draw / meld / discard / take-pile / go-out`
 
 > **Design note:** the feed lives in `GameView` UI state, computed in an effect that diffs
 > the previous vs current `round` (skipping round/game transitions) — so it needs **no**
