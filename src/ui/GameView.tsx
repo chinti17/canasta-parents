@@ -5,7 +5,7 @@
 // feedback, go-out confirmation) lives in the pure controller. Round-end and
 // game-over flows pause play for a scoreboard / winner screen.
 
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer, useRef, useState } from 'react'
 import {
   dispatch as sessionDispatch,
   isBotTurn,
@@ -21,6 +21,8 @@ import Scoreboard from './Scoreboard'
 import ActionBar from './ActionBar'
 import RoundEnd from './RoundEnd'
 import GameOver from './GameOver'
+import PlayFeed from './PlayFeed'
+import { summarizePlay, type PlayEntry } from './playLog'
 import {
   initialUiState,
   reduceUi,
@@ -43,6 +45,25 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
   const [ui, setUi] = useState<UiState>(initialUiState)
   // One-time first-turn nudge, dismissed on the player's first action.
   const [tipDismissed, setTipDismissed] = useState(false)
+
+  // Recent-plays feed, derived by diffing the round on each change (display
+  // only; ephemeral — not persisted). Skip new deals / game transitions.
+  const [feed, setFeed] = useState<PlayEntry[]>([])
+  const prev = useRef({
+    round: initialSession.round,
+    roundNumber: initialSession.roundNumber,
+  })
+  useEffect(() => {
+    const p = prev.current
+    if (p.round === session.round) return
+    if (p.roundNumber === session.roundNumber) {
+      const entry = summarizePlay(p.round, session.round)
+      if (entry) setFeed((f) => [entry, ...f].slice(0, 8))
+    } else {
+      setFeed([]) // new round dealt — start the feed fresh
+    }
+    prev.current = { round: session.round, roundNumber: session.roundNumber }
+  }, [session.round, session.roundNumber])
 
   // Autosave so a refresh resumes the game — but forget a finished game so the
   // start screen never offers to "resume" something that's already over.
@@ -134,6 +155,8 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
       </section>
 
       <CenterTable round={round} />
+
+      <PlayFeed entries={feed} />
 
       <section className="grid gap-2">
         {round.teams.map((t) => (
