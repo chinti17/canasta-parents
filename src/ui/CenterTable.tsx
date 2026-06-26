@@ -13,10 +13,10 @@ export default function CenterTable({ round }: { round: RoundState }) {
   const recent = pile.slice(-RECENT) // oldest -> newest (newest is the top)
 
   return (
-    <section className="flex items-center justify-center gap-6 rounded-lg border border-white/10 bg-green-800/50 p-4">
+    <section className="flex items-center justify-center gap-4 rounded-lg border border-white/10 bg-green-800/50 p-2.5">
       {/* Stock */}
       <div className="flex flex-col items-center gap-1">
-        <Card faceDown size="lg" />
+        <Card faceDown size="md" />
         <span className="font-mono text-[0.65rem] text-white/70">
           {round.stock.length} stock
         </span>
@@ -31,17 +31,17 @@ export default function CenterTable({ round }: { round: RoundState }) {
               return (
                 <div
                   key={c.id}
-                  className={`${i === 0 ? '' : '-ml-6'} ${
+                  className={`${i === 0 ? '' : '-ml-5'} ${
                     newest ? 'z-10' : 'opacity-80'
                   }`}
                 >
-                  <Card card={c} size="lg" />
+                  <Card card={c} size="md" />
                 </div>
               )
             })}
           </div>
         ) : (
-          <div className="h-20 w-14 rounded-lg border border-dashed border-white/20" />
+          <div className="h-16 w-11 rounded-md border border-dashed border-white/20" />
         )}
         <span className="font-mono text-[0.65rem] text-white/70">
           {pile.length} pile

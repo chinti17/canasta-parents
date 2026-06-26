@@ -58,7 +58,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
     if (p.round === session.round) return
     if (p.roundNumber === session.roundNumber) {
       const entry = summarizePlay(p.round, session.round)
-      if (entry) setFeed((f) => [entry, ...f].slice(0, 8))
+      if (entry) setFeed((f) => [entry, ...f].slice(0, 4))
     } else {
       setFeed([]) // new round dealt — start the feed fresh
     }
@@ -123,7 +123,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-3 bg-green-900 p-3 text-white">
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-2 bg-green-900 p-2 text-white">
       <header className="flex items-center justify-between text-xs text-green-200">
         <span className="font-semibold">Canasta</span>
         <button
@@ -152,7 +152,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
 
       <Scoreboard teams={round.teams} scores={session.scores} />
 
-      <section className="grid grid-cols-2 gap-2">
+      <section className="grid grid-cols-2 gap-1.5">
         {opponents.map(seatChip)}
       </section>
 
@@ -160,7 +160,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
 
       <PlayFeed entries={feed} />
 
-      <section className="grid gap-2">
+      <section className="grid gap-1.5">
         {round.teams.map((t) => (
           <TeamMelds key={t.id} team={t} />
         ))}
