@@ -11,6 +11,8 @@ interface SeatProps {
   hasMelded: boolean
   /** Highlight the human's perspective seat. */
   you?: boolean
+  /** This seat is the human's partner (same team). */
+  partner?: boolean
 }
 
 export default function Seat({
@@ -20,8 +22,10 @@ export default function Seat({
   isActive,
   hasMelded,
   you,
+  partner,
 }: SeatProps) {
   const c = teamColors(teamId)
+  const teamLetter = c.label.replace('Team ', '')
   return (
     <div
       className={`flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 transition-all ${c.border} ${c.panel} ${
@@ -29,10 +33,16 @@ export default function Seat({
       }`}
     >
       <div className="flex items-center gap-1.5 truncate">
-        <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${c.bg}`} />
+        <span
+          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[0.55rem] font-bold text-white ${c.bg}`}
+          title={c.label}
+        >
+          {teamLetter}
+        </span>
         <span className="truncate text-xs font-semibold text-white">
           {label}
           {you && <span className="ml-1 text-white/60">(you)</span>}
+          {partner && <span className="ml-1 text-white/60">(partner)</span>}
         </span>
       </div>
       <div className="flex items-center gap-1.5 text-[0.65rem] text-white/70">

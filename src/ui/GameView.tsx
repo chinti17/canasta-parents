@@ -105,6 +105,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
     .map((p) => p.seat)
     .filter((s) => s !== HUMAN_SEAT)
 
+  const humanTeam = round.players[HUMAN_SEAT]!.teamId
   const seatChip = (seat: number) => {
     const p = round.players[seat]!
     return (
@@ -116,6 +117,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
         isActive={!round.over && round.currentSeat === seat}
         hasMelded={round.teams[p.teamId]!.hasMelded}
         you={seat === HUMAN_SEAT}
+        partner={seat !== HUMAN_SEAT && p.teamId === humanTeam}
       />
     )
   }
