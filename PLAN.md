@@ -269,6 +269,44 @@ no settings sprawl.
 
 ---
 
+### Phase 9 — Table legibility: see every player's plays as cards (post-v1)
+
+**Why:** During play-test it's hard to follow what the other five seats did — bots act
+every ~0.8s and the only signals are the single top discard card, the meld panels, and
+the active-seat ring. There's no history, so a play is easy to miss. For non-technical
+players (parents/friends) the table should read as **actual cards**, not counts to
+decipher. The 3-team structure (A/B/C, partners 3 seats apart) is also not obvious.
+
+**Objective:** Make each turn followable at a glance — show recent discards as real
+cards and a short per-turn play feed — and make team membership clear. No engine changes:
+the feed is derived by diffing round state in a pure, testable helper.
+
+**Commit-plan:**
+
+- [ ] `feat(ui): recent-discards row` — render the discard pile as a fanned row of the
+      last few **real cards** (most-recent highlighted), not just the single top card;
+      keep the count + ❄ frozen badge.
+- [ ] `feat(ui): summarizePlay(before, after)` — a pure helper that diffs two round states
+      into a play entry (acting seat + parts: drew / melded \[cards] / took the pile /
+      discarded \[card] / went out / red 3). No engine instrumentation.
+- [ ] `feat(ui): play feed` — a short scrolling list of recent turns rendered with seat
+      label, team colour, and small card images; fed by `summarizePlay`, capped to the
+      last ~8 entries, ephemeral (UI state, not persisted).
+- [ ] `feat(ui): team/partner labels on seats` — show each seat's team (A/B/C) and mark
+      your partner, so the three teams read clearly.
+- [ ] `test(ui): summarizePlay across draw / meld / discard / take-pile / go-out`
+
+> **Design note:** the feed lives in `GameView` UI state, computed in an effect that diffs
+> the previous vs current `round` (skipping round/game transitions) — so it needs **no**
+> changes to the engine, session schema, or persistence. Keeps the dependency ceiling and
+> the pure-engine boundary intact.
+
+**Outcome:** A player (or a watching friend) can see, as cards, what each seat just did and
+what's recently been discarded, and can tell at a glance who's on which team. Bots still
+play automatically; this is display-only.
+
+---
+
 ## 5. Explicitly out of scope for v1 (future phases)
 
 - Python/FastAPI multiplayer server (REST + polling) — engine will be ported from the v1 TS engine.
