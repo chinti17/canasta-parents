@@ -307,6 +307,43 @@ play automatically; this is display-only.
 
 ---
 
+### Phase 10 — Named players & team draft (post-v1)
+
+**Why:** The table is anonymous (P1–P6). Giving the six seats real names and letting the
+player pick which one is theirs — with a randomly drafted partner — makes a game feel
+personal and varies who you're partnered with each game.
+
+**Objective:** On **New Game**, the player picks their name from a fixed six-name roster
+(**Paresh, Nita, Anil, Divya, Nitin, Swati**) in a dropdown. On **Start Game**, that name
+takes the player's seat; **one** of the remaining five names is randomly drafted as the
+player's **partner** (same team of two), and the **other four** are shuffled randomly across
+the other two teams. Names show on the table, with the partner marked.
+
+> The six teams of 3×2 seating is unchanged (partners sit `numTeams` apart). This is a
+> name-assignment + draft layer over the existing engine — no rule changes. The human keeps
+> seat 0 (Team A); the draft is the seeded random assignment of the five bot names to the
+> five bot seats, so the partner (seat 3) is a random one of the five.
+
+**Decisions (defaults applied):** team labels stay **Team A/B/C** with names shown on
+seats; **New Game / Game Over** return to the start screen to re-pick a name and reshuffle;
+the partner's seat is marked. (Merged with Phase 9's seat labels: partner shown via the
+shared `partner` prop.)
+
+**Commit-plan:**
+
+- [x] `feat(game): seat-name assignment — human's pick at their seat, remaining roster seeded-shuffled across bot seats`
+- [x] `feat(game): carry player names on the session + persist them (schema bump); save summary shows your name`
+- [x] `feat(ui): New Game name dropdown (pick your name) → Start Game`
+- [x] `feat(ui): show names on seats, badge the drafted partner, use names in turn/status text`
+- [x] `feat(ui): New Game and Game Over return to the name picker (re-pick + reshuffle)`
+- [x] `test(game): seat-name assignment (human seat fixed, full roster used once, partner is a random other)`
+
+**Outcome:** Starting a game asks for your name, drafts you a named partner and two named
+opposing teams (randomised per game), and the table shows everyone by name with your
+partner marked. Resuming a saved game restores the same names.
+
+---
+
 ## 5. Explicitly out of scope for v1 (future phases)
 
 - Python/FastAPI multiplayer server (REST + polling) — engine will be ported from the v1 TS engine.
