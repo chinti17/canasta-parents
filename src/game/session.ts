@@ -15,6 +15,7 @@ import {
   type RoundState,
 } from '../engine/types'
 import { playTurn } from '../bots/bot'
+import { defaultSeatNames } from './players'
 
 /** Turn order is ascending seats, wrapping around the table. */
 export function nextSeat(seat: number, numPlayers: number): number {
@@ -35,6 +36,8 @@ export interface GameSession {
   seed: number
   /** The single seat a human controls; every other seat is a bot. */
   humanSeat: number
+  /** Display name per seat (index = seat). The human's pick sits at `humanSeat`. */
+  names: string[]
   roundNumber: number
   round: RoundState
   /** Cumulative team scores carried across rounds (drives meld minimums). */
@@ -56,17 +59,22 @@ export type GameEvent =
   | { type: 'NEXT_ROUND' }
   | { type: 'NEW_GAME'; seed: number }
 
-/** Start a fresh game. Round 0 is dealt from `seed`; all scores begin at zero. */
+/**
+ * Start a fresh game. Round 0 is dealt from `seed`; all scores begin at zero.
+ * `names` sets each seat's display name (defaults to P1…Pn for headless/tests).
+ */
 export function createSession(
   seed: number,
   config: GameConfig = DEFAULT_CONFIG,
   humanSeat = 0,
+  names: string[] = defaultSeatNames(config.numPlayers),
 ): GameSession {
   const scores = Array.from({ length: config.numTeams }, () => 0)
   return {
     config,
     seed,
     humanSeat,
+    names,
     roundNumber: 0,
     round: createRound(seed, config, scores),
     scores,

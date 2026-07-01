@@ -9,9 +9,10 @@
 import type { GameSession } from './session'
 
 export const STORAGE_KEY = 'canasta:session'
-// v2: front-door release. Bumped so pre-front-door / spectator saves (which
-// could carry a non-human humanSeat) are rejected rather than resumed.
-export const SCHEMA_VERSION = 2
+// v2: front-door release (reject pre-front-door / spectator saves).
+// v3: named-players release — sessions carry a per-seat `names` array, so older
+//     saves without it are rejected rather than resumed into a nameless table.
+export const SCHEMA_VERSION = 3
 
 /** The slice of the Web Storage API we rely on (injectable for tests). */
 export interface StorageLike {
@@ -69,6 +70,14 @@ export function deserializeSession(json: string): GameSession | null {
   ) {
     return null
   }
+  // Reject a save missing its per-seat names (shouldn't happen within a schema
+  // version, but guards against a hand-edited or partial blob).
+  if (
+    !Array.isArray(session.names) ||
+    session.names.length !== session.config.numPlayers
+  ) {
+    return null
+  }
   return session
 }
 
@@ -79,8 +88,12 @@ export interface SaveSummary {
   scores: number[]
   /** Whether it's the human's turn to act right now. */
   yourTurn: boolean
-  /** Seat whose turn it is (for "P3 to draw" style labels). */
+  /** Seat whose turn it is (for "Anil to play" style labels). */
   currentSeat: number
+  /** The human player's chosen name. */
+  playerName: string
+  /** Name of whoever's turn it is. */
+  currentName: string
 }
 
 /** A short, display-friendly summary of a saved game (for the Resume card). */
@@ -90,6 +103,8 @@ export function summarizeSave(session: GameSession): SaveSummary {
     scores: session.scores,
     yourTurn: session.round.currentSeat === session.humanSeat,
     currentSeat: session.round.currentSeat,
+    playerName: session.names[session.humanSeat] ?? 'You',
+    currentName: session.names[session.round.currentSeat] ?? 'P',
   }
 }
 
