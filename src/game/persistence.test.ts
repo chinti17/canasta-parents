@@ -5,6 +5,7 @@ import {
   deserializeSession,
   loadSession,
   saveSession,
+  SCHEMA_VERSION,
   serializeSession,
   STORAGE_KEY,
   summarizeSave,
@@ -68,6 +69,13 @@ describe('persistence', () => {
     const spectator = { ...createSession(1), humanSeat: -1 }
     expect(deserializeSession(serializeSession(spectator))).toBeNull()
   })
+
+  it('rejects a save missing its per-seat names', () => {
+    const session = createSession(1) as unknown as Record<string, unknown>
+    delete session.names
+    const envelope = JSON.stringify({ version: SCHEMA_VERSION, session })
+    expect(deserializeSession(envelope)).toBeNull()
+  })
 })
 
 describe('summarizeSave', () => {
@@ -77,5 +85,7 @@ describe('summarizeSave', () => {
     expect(summary.scores).toEqual([0, 0, 0])
     expect(summary.yourTurn).toBe(true) // seat 0 == humanSeat 0 on the first deal
     expect(summary.currentSeat).toBe(0)
+    expect(summary.playerName).toBe('P1') // default label at the human seat
+    expect(summary.currentName).toBe('P1')
   })
 })
