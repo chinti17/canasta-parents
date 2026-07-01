@@ -239,7 +239,7 @@ first turn is self-explanatory — plus the fixes from a code review of Phases 5
 
 - [x] `fix(ui): human draw-phase deadlock on stock-out` — when the stock is empty and no
       take-pile option exists, `Draw stock` is disabled (`canDrawStock = drawing &&
-      stock.length>0`) and the human has no control to act with. The engine ends the round
+    stock.length>0`) and the human has no control to act with. The engine ends the round
       on `DRAW_STOCK` from an empty stock, but the UI can't trigger it. Offer an explicit
       "end turn / stock out" path (or let the disabled draw pass through to end the round).
       **[High — correctness]**
@@ -250,7 +250,7 @@ first turn is self-explanatory — plus the fixes from a code review of Phases 5
       also validate the save (bump `SCHEMA_VERSION` / check `humanSeat`) before resuming.
       **[High — UX/correctness]**
 - [x] `fix(ui): meld hint shown for non-meld selections` — in the action phase the hint
-      always reports a *meld* rejection, so selecting one card to discard shows
+      always reports a _meld_ rejection, so selecting one card to discard shows
       "a meld needs at least 3 cards", which looks like an error when discarding is legal.
       Only hint when a meld is actually being attempted, or word it neutrally. **[Med — UX]**
 - [x] `perf(ui): memoize availableActions in ActionBar` — `availableActions(round)` runs

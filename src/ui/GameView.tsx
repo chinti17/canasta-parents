@@ -184,8 +184,8 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
           <>
             {showTip && (
               <div className="animate-fade-in rounded-md border border-yellow-400/40 bg-yellow-400/10 px-3 py-2 text-[0.7rem] text-yellow-100">
-                👋 Your turn. First <b>draw the stock</b> (or take the pile), then
-                tap cards to <b>meld</b> and <b>discard</b> one to finish.
+                👋 Your turn. First <b>draw the stock</b> (or take the pile),
+                then tap cards to <b>meld</b> and <b>discard</b> one to finish.
               </div>
             )}
             {seatChip(HUMAN_SEAT)}
