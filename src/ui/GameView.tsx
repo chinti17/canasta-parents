@@ -111,7 +111,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
     return (
       <Seat
         key={seat}
-        label={`P${seat + 1}`}
+        label={session.names[seat] ?? `P${seat + 1}`}
         teamId={p.teamId}
         handCount={p.hand.length}
         isActive={!round.over && round.currentSeat === seat}
@@ -146,7 +146,7 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
           Round {session.roundNumber + 1} ·{' '}
           {myTurn
             ? `Your turn — ${round.phase === 'draw' ? 'draw or take the pile' : 'meld, lay off, or discard'}`
-            : `P${round.currentSeat + 1} to ${round.phase}`}
+            : `${session.names[round.currentSeat] ?? `P${round.currentSeat + 1}`} to ${round.phase}`}
         </div>
       )}
 
@@ -171,7 +171,8 @@ export default function GameView({ initialSession, onHome }: GameViewProps) {
           <GameOver
             winningTeam={session.winningTeam!}
             scores={session.scores}
-            onNewGame={() => dispatch({ type: 'NEW_GAME', seed: Date.now() })}
+            // Back to the front door to pick a name and reshuffle teams.
+            onNewGame={onHome}
           />
         ) : betweenRounds && session.lastRoundResult ? (
           <RoundEnd
